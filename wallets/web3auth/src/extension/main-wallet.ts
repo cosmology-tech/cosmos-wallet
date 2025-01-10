@@ -1,6 +1,6 @@
 import { MainWalletBase } from '@cosmos-kit/core';
-import { getHashQueryParams } from '@toruslabs/openlogin';
-import { OPENLOGIN_NETWORK } from '@web3auth/openlogin-adapter';
+import { getHashQueryParams } from '@web3auth/auth-adapter';
+import { WEB3AUTH_NETWORK } from '@web3auth/base';
 
 import { Web3AuthChainWallet } from './chain-wallet';
 import { Web3AuthClient } from './client';
@@ -29,7 +29,7 @@ export class Web3AuthWallet extends MainWalletBase {
 
       if (
         typeof options.client?.web3AuthNetwork !== 'string' ||
-        !Object.values(OPENLOGIN_NETWORK).includes(
+        !Object.values(WEB3AUTH_NETWORK).includes(
           options.client.web3AuthNetwork
         )
       ) {
@@ -69,9 +69,7 @@ export class Web3AuthWallet extends MainWalletBase {
         return;
       }
 
-      // Same logic used in `@web3auth/openlogin-adapter` >
-      // `@toruslabs/openlogin` init function to determine if the adapter should
-      // attempt to connect from the redirect.
+      // Same logic used in `@web3auth/auth-adapter` >
       const redirectResult = getHashQueryParams();
       const shouldAutoConnect =
         Object.keys(redirectResult).length > 0 &&

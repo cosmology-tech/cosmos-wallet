@@ -1,20 +1,17 @@
 import { sha256 } from '@cosmjs/crypto';
 import { toUtf8 } from '@cosmjs/encoding';
 import eccrypto, { Ecies } from '@toruslabs/eccrypto';
+import { AuthAdapter, AuthLoginParams } from '@web3auth/auth-adapter';
 import {
   ADAPTER_STATUS,
   CHAIN_NAMESPACES,
   CustomChainConfig,
   SafeEventEmitterProvider,
+  UX_MODE,
   WALLET_ADAPTERS,
 } from '@web3auth/base';
 import { CommonPrivateKeyProvider } from '@web3auth/base-provider';
 import { Web3AuthNoModal } from '@web3auth/no-modal';
-import {
-  OpenloginAdapter,
-  OpenloginLoginParams,
-  UX_MODE,
-} from '@web3auth/openlogin-adapter';
 
 import {
   FromWorkerMessage,
@@ -126,15 +123,21 @@ export const connectClientAndProvider = async (
     chainId: 'other',
     rpcTarget: 'other',
     displayName: 'other',
-    blockExplorer: 'other',
+    blockExplorerUrl: 'other',
     ticker: 'other',
     tickerName: 'other',
     ...options.client.chainConfig,
     chainNamespace: CHAIN_NAMESPACES.OTHER,
   };
+  const privateKeyProvider = new CommonPrivateKeyProvider({
+    config: {
+      chainConfig,
+    },
+  });
   const client = new Web3AuthNoModal({
     ...options.client,
     chainConfig,
+    privateKeyProvider,
   });
 
   // Popups are blocked by default on mobile browsers, so use redirect. Popup is
@@ -154,18 +157,12 @@ export const connectClientAndProvider = async (
     );
   }
 
-  const privateKeyProvider = new CommonPrivateKeyProvider({
-    config: {
-      chainConfig,
-    },
-  });
-  const openloginAdapter = new OpenloginAdapter({
-    privateKeyProvider,
+  const authAdapter = new AuthAdapter({
     adapterSettings: {
       uxMode,
     },
   });
-  client.configureAdapter(openloginAdapter);
+  client.configureAdapter(authAdapter);
 
   await client.init();
 
@@ -173,10 +170,10 @@ export const connectClientAndProvider = async (
   if (!client.connected && !dontAttemptLogin) {
     try {
       const loginHint = options.getLoginHint?.();
-      provider = await client.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
+      provider = await client.connectTo(WALLET_ADAPTERS.AUTH, {
         loginProvider: options.loginProvider,
         login_hint: loginHint,
-      } as OpenloginLoginParams);
+      } as AuthLoginParams);
     } catch (err) {
       // Unnecessary error thrown during redirect, so log and ignore it.
       if (

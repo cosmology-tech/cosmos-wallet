@@ -4,8 +4,8 @@ import { OfflineDirectSigner } from '@cosmjs/proto-signing';
 import { DappEnv, WalletClient } from '@cosmos-kit/core';
 import { makeADR36AminoSignDoc } from '@keplr-wallet/cosmos';
 import eccrypto from '@toruslabs/eccrypto';
+import { LOGIN_PROVIDER } from '@web3auth/auth-adapter';
 import { UserInfo } from '@web3auth/base';
-import { LOGIN_PROVIDER } from '@web3auth/openlogin-adapter';
 
 import { Web3AuthSigner } from './signer';
 import { Web3AuthClientOptions } from './types';
