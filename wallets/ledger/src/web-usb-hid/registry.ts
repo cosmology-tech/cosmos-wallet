@@ -1,4 +1,5 @@
 import { Wallet } from '@cosmos-kit/core';
+
 import { ICON } from '../constant';
 
 export const LedgerInfo: Wallet = {

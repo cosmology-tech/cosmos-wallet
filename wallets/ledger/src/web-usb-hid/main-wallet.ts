@@ -1,6 +1,6 @@
-import { EndpointOptions, Wallet } from '@cosmos-kit/core';
-import { MainWalletBase } from '@cosmos-kit/core';
-import { LedgerChianWallet } from './chain-wallet';
+import { EndpointOptions, MainWalletBase, Wallet } from '@cosmos-kit/core';
+
+import { LedgerChainWallet } from './chain-wallet';
 import { LedgerClient } from './client';
 import { TransportType } from './utils';
 
@@ -11,7 +11,7 @@ export class LedgerMainWallet extends MainWalletBase {
     preferredEndpoints?: EndpointOptions['endpoints'],
     transportType: TransportType = 'WebUSB'
   ) {
-    super(walletInfo, LedgerChianWallet);
+    super(walletInfo, LedgerChainWallet);
     this.preferredEndpoints = preferredEndpoints;
     this.transportType = transportType;
   }

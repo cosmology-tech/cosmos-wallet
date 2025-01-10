@@ -66,12 +66,14 @@
   },
   "dependencies": {
     "@cosmos-kit/core": "^2.15.1",
-    "@ledgerhq/hw-app-cosmos": "^6.28.1",
-    "@ledgerhq/hw-transport-webhid": "^6.27.15",
-    "@ledgerhq/hw-transport-webusb": "^6.27.15"
+    "@ledgerhq/hw-app-cosmos": "^6.30.4",
+    "@ledgerhq/hw-transport-webhid": "^6.30.0",
+    "@ledgerhq/hw-transport-webusb": "^6.29.4"
   },
   "peerDependencies": {
-    "@cosmjs/amino": ">=0.32.3",
-    "@cosmjs/proto-signing": ">=0.32.3"
+    "@cosmjs/amino": ">=0.32.4",
+    "@cosmjs/crypto": ">=0.32.4",
+    "@cosmjs/encoding": ">=0.32.4",
+    "@cosmjs/proto-signing": ">=0.32.4"
   }
 }

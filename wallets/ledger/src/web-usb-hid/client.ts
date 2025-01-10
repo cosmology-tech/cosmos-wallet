@@ -1,9 +1,17 @@
-import { StdSignDoc } from '@cosmjs/amino';
+import {
+  encodeSecp256k1Signature,
+  OfflineAminoSigner,
+  StdSignDoc,
+} from '@cosmjs/amino';
+import { sortedJsonStringify } from '@cosmjs/amino/build/signdoc';
+import { Secp256k1Signature } from '@cosmjs/crypto';
+import { fromHex } from '@cosmjs/encoding';
 import { Algo } from '@cosmjs/proto-signing';
-import { WalletClient } from '@cosmos-kit/core';
+import { SignType, WalletClient } from '@cosmos-kit/core';
 import Cosmos from '@ledgerhq/hw-app-cosmos';
 
 import { ChainIdToBech32Prefix, getCosmosApp, getCosmosPath } from './utils';
+
 export class LedgerClient implements WalletClient {
   client: Cosmos;
 
@@ -39,8 +47,36 @@ export class LedgerClient implements WalletClient {
       username: username ?? path,
       address,
       algo: 'secp256k1' as Algo,
-      pubkey: new TextEncoder().encode(publicKey),
+      pubkey: fromHex(publicKey),
       isNanoLedger: true,
+    };
+  }
+
+  getOfflineSigner(chainId: string, preferredSignType?: SignType) {
+    // Ledger doesn't support direct sign, only Amino sign
+    if (preferredSignType === 'direct') {
+      throw new Error('Unsupported sign type: direct');
+    }
+    return this.getOfflineSignerAmino(chainId);
+  }
+
+  getOfflineSignerAmino(chainId: string): OfflineAminoSigner {
+    return {
+      getAccounts: async () => {
+        return [await this.getAccount(chainId)];
+      },
+      signAmino: async (_signerAddress, signDoc) => {
+        const { pubkey } = await this.getAccount(chainId);
+        const { signature: derSignature } = await this.sign(signDoc); // The signature is in DER format
+        const signature = Secp256k1Signature.fromDer(derSignature); // Convert the DER signature to fixed length (64 bytes)
+        return {
+          signed: signDoc,
+          signature: encodeSecp256k1Signature(
+            pubkey,
+            signature.toFixedLength()
+          ),
+        };
+      },
     };
   }
 
@@ -48,7 +84,7 @@ export class LedgerClient implements WalletClient {
     if (!this.client) await this.initClient();
     return await this.client.sign(
       getCosmosPath(accountIndex),
-      JSON.stringify(signDoc)
+      sortedJsonStringify(signDoc) // signDoc MUST be serialized in lexicographical key order
     );
   }
 }
